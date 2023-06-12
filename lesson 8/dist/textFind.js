@@ -1,0 +1,1 @@
+"use strict";function printPageDecoration(o){var e="*".repeat(o.length+4),n="*".concat(" ".repeat(o.length+2),"*");console.log(e),console.log("*".concat(" ",o," ","*")),console.log(n),console.log(e)}module.exports=printPageDecoration;

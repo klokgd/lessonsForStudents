@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Todo-list</title>
+    <meta charset="utf-8" />
+</head>
+<body>
+      
+    h1 Todo-list
+      
+    if anyTodos
+        <ul>
+            each todo in todolists
+                input(
+                  type='checkbox'
+                  name='agreement'
+                  checked = todo.isComplete
+                )
+                <li>#{todo.name}</li>
+                <p>#{todo.description}</p>
+        </ul>
+    else
+        <p>На сегодня задач нет</p>
+</body>
+<html>

@@ -1,51 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    <h1>Новости</h1>
-    <div class="news">
-        #news
-    </div>
-    <h2>Добавить новость:</h2>
-    <form method="POST">
-        Заголовок:<br>
-        <input type="text" name="title"><br>
-        Описание:<br>
-        <input type="text" name="description"><br>
-        <button>Отправить</button>
-    </form>
-</body>
-<style>
-    .news {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <h1>Новости</h1>
+        <div class="news" id="news">#news</div>
+        <h2>Добавить новость:</h2>
+        <form method="POST" id="save_news_form" enctype="multipart/form-data">
+            Заголовок:<br />
+            <input type="text" name="title" /><br />
+            Описание:<br />
+            <input type="text" name="description" /><br />
+            Изображение: <br />
+            <input type="file" name="image" /><br />
+            <button >Отправить</button>
+        </form>
+    </body>
+    <style>
+        .news {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-    .news-item {
-      width: 300px;
-      margin: 10px;
-      padding: 10px;
-      border: 1px solid #ccc;
-    }
+        .news-item {
+            width: 300px;
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
 
-    .news-title {
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
+        .news-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
 
-    .news-image {
-      width: 100%;
-      margin-bottom: 10px;
-    }
+        .news-image {
+            width: 100%;
+            margin-bottom: 10px;
+        }
 
-    .news-content {
-      line-height: 1.5;
-    }
-  </style>
+        .news-content {
+            line-height: 1.5;
+        }
+    </style>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="helpers.js"></script>
+    <script>
+        // const form = document.getElementById("save_news_form");
+
+        // form.addEventListener("submit", function (event) {
+        //     event.preventDefault();
+        // });
+
+        const newsArray = document.getElementById("news");
+        const socket = io();
+        socket.on("update news", (news) => {
+            var newDiv = document.createElement("div");
+            newDiv.innerHTML = returnNewsHtmlBlock(news);
+            newsArray.appendChild(newDiv);
+        });
+
+        socket.on("delete news", (id) => {
+            var button = document.getElementById(id);
+            button.parentNode.remove();
+        });
+
+        async function deleteNews(id) {
+            await fetch("/", {
+                method: "delete",
+                body: JSON.stringify({ id: id }),
+                headers: {
+                    "Content-Type": "application/json",
+                    // "Content-Type": "application/x-www-form-urlencoded",
+                },
+            });
+        }
+
+        const buttons = document.getElementsByClassName("delete");
+        for (let i = 0; i < buttons.length; i++) {
+            buttons[i].addEventListener("click", function (event) {
+                console.log("Попытка удалить новость c id " + event.target.id);
+                deleteNews(event.target.id).then(() => {});
+            });
+        }
+    </script>
 </html>
