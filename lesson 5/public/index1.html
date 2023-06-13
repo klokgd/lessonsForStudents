@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Chat</title>
+    </head>
+    <body>
+
+
+        <input type="text" id="msg" /><br />
+        <input type="checkbox" id="blackroom" />Черная Комната<br />
+        <input type="checkbox" id="redroom" />Красная Комната<br />
+        <input type="checkbox" id="purpleroom" />Фиолетовая Комната<br />
+        <button id="sendBtn">Отправить</button>
+        <div id="msgBox"></div>
+        <div id="box"></div>
+        <style>
+            #box {
+                width: 400px;
+                height: 400px;
+                border: solid;
+            }
+        </style>
+        <script src="/socket.io/socket.io.js"></script>
+        <script>
+            let username = prompt("Ваше имя");
+            let socket = io();
+
+            socket.emit("new user", username);
+            let msgBox = document.getElementById("msgBox");
+            socket.on("message", function (data) {
+                let div = document.createElement("div");
+                div.style.color = data.color
+                div.textContent = `${data.name}: ${data.text}`;
+                msgBox.append(div);
+            });
+
+            let msg = document.getElementById("msg");
+            let sendBtn = document.getElementById("sendBtn");
+
+            let blackroom = document.getElementById("blackroom");
+            let redroom = document.getElementById("redroom");
+            let purpleroom = document.getElementById("purpleroom");
+            blackroom.name = "black";
+            redroom.name = "red";
+            purpleroom.name = "purple";
+            let checkboxArray = [blackroom, redroom, purpleroom];
+
+            sendBtn.onclick = function () {
+                let obj = {
+                    name: username,
+                    text: msg.value,
+                };
+                obj.checkboxes = checkboxArray
+                    .filter((checkbox) => checkbox.checked == true)
+                    .map((checkbox) => {
+                        return {
+                            name: checkbox.name,
+                        };
+                    });
+                debugger;
+
+                socket.emit("sendMessage", obj);
+            };
+
+            blackroom.onchange = function () {
+                socket.emit("changeRoom", {
+                    name: "black",
+                    checked: blackroom.checked,
+                });
+            };
+            redroom.onchange = function () {
+                socket.emit("changeRoom", {
+                    name: "red",
+                    checked: redroom.checked,
+                });
+            };
+            purpleroom.onchange = function () {
+                socket.emit("changeRoom", {
+                    name: "purple",
+                    checked: purpleroom.checked,
+                });
+            };
+
+            let box = document.getElementById("box");
+            box.onmousemove = function (ev) {
+                let obj = {
+                    name: username,
+                    coords: {
+                        x: ev.pageX,
+                        y: ev.pageY,
+                    },
+                };
+                socket.emit("move", obj);
+            };
+
+            socket.on("changePos", function (users) {
+                for (let div of users) {
+                    let b = document.getElementById(div.name);
+                    if (b == null) {
+                        b = document.createElement("div");
+                        b.id = div.name;
+                        box.append(b);
+                    }
+                    b.style.left = div.coords.x + "px";
+                    b.style.top = div.coords.y + "px";
+                    b.style.position = "absolute";
+                    b.style.width = "10px";
+                    b.style.height = "10px";
+                    b.style.backgroundColor = "red";
+                }
+            });
+        </script>
+    </body>
+</html>
